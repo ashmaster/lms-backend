@@ -52,6 +52,10 @@ const bookSchema = mongoose.Schema({
     },
     remarks: {
         type: String
+    }, 
+    language: {
+        type: String,
+        enum: ['E', 'M', 'H']
     }
 })
 

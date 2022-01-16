@@ -198,7 +198,7 @@ router.post('/create_book', async (req, res) => {
 
 router.get('/book/:id', async (req, res) => {
     try {
-        const book = await Book.find({ bookId: req.params.id }).select(["b_name", "author", "price", "lentBy", "y_o_publish", "bookAvailable", "bookId"])
+        const book = await Book.find({ stock_no: req.params.id }).select(["b_name", "author", "price", "lentBy", "y_o_publish", "bookAvailable", "bookId", "language"])
         const transaction = await Transaction.find({ bookId: req.params.id }).select(["s_name","admissionNo","date_of_lending", "date_of_return"])
         book[0]["transactions"] = transaction;
         if (book.length !== 0) {
@@ -224,6 +224,42 @@ router.get('/book/:id', async (req, res) => {
             status: false,
             data: {},
             msg: "Book could not be found"
+        }
+        res.status(200).json(failure)
+    }
+
+})
+
+//get a book by id
+
+router.get('/books/:name', async (req, res) => {
+    try {
+        const book = await Book.find({'$text':{'$search': req.params.name}})
+        /*const transaction = await Transaction.find({ bookId: req.params.id }).select(["s_name","admissionNo","date_of_lending", "date_of_return"])
+        book[0]["transactions"] = transaction;*/
+        if (book.length !== 0) {
+            let success = {
+                status: true,
+                data: book,
+            }
+            res.status(200).json(success)
+        }
+        else {
+            let success = {
+                status: false,
+                data: {},
+                msg: "No books with this name"
+            }
+            res.status(200).json(success)
+        }
+
+    }
+
+    catch (err) {
+        let failure = {
+            status: false,
+            data: {},
+            msg: err
         }
         res.status(200).json(failure)
     }
@@ -402,7 +438,7 @@ router.get('/pending_return', async (req, res) => {
         }
         else {
             let success = {
-                status: false,
+                status: true,
                 transactions: transaction,
                 msg: "No books pending return"
             }
@@ -412,7 +448,7 @@ router.get('/pending_return', async (req, res) => {
     }
 
     catch (err) {
-        res.status(404).json({ err: "No User Or Server Error" })
+        res.status(404).json({ status: false, err: "No User Or Server Error" })
     }
 
 })
