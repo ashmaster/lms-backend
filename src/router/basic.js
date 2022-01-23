@@ -198,7 +198,7 @@ router.post('/create_book', async (req, res) => {
 
 router.get('/book/:id', async (req, res) => {
     try {
-        const book = await Book.find({ stock_no: req.params.id }).select(["b_name", "author", "price", "lentBy", "y_o_publish", "bookAvailable", "bookId", "language"])
+        const book = await Book.find({ bookId: req.params.id }).select(["b_name", "author", "price", "lentBy", "y_o_publish", "bookAvailable", "bookId", "language"])
         const transaction = await Transaction.find({ bookId: req.params.id }).select(["s_name","admissionNo","date_of_lending", "date_of_return"])
         book[0]["transactions"] = transaction;
         if (book.length !== 0) {
@@ -234,7 +234,18 @@ router.get('/book/:id', async (req, res) => {
 
 router.get('/books/:name', async (req, res) => {
     try {
-        const book = await Book.find({'$text':{'$search': req.params.name}})
+        const book = await Book.aggregate([{
+            $search: {
+              index: 'search_by_word',
+              text: {
+                query: req.params.name,
+                path: {
+                  'wildcard': '*'
+                }
+              }
+            }
+          }])
+          console.log(book)
         /*const transaction = await Transaction.find({ bookId: req.params.id }).select(["s_name","admissionNo","date_of_lending", "date_of_return"])
         book[0]["transactions"] = transaction;*/
         if (book.length !== 0) {
@@ -270,7 +281,7 @@ router.get('/books/:name', async (req, res) => {
 
 router.post('/delete_book/:id', async (req, res) => {
     try {
-        let book = await Book.findOneAndDelete({ bookId: req.params.id })
+        let book = await Book.findOneAndDelete({ stock_no: req.params.id })
         if (book) {
             let success = {
                 status: true,
@@ -297,7 +308,7 @@ router.post('/delete_book/:id', async (req, res) => {
 router.post('/update_book/:id', async (req, res) => {
     const bookDetails = req.body
     try {
-        let book = await Book.findOneAndUpdate({ bookId: req.params.id }, { ...bookDetails })
+        let book = await Book.findOneAndUpdate({ stock_no: req.params.id }, { ...bookDetails })
         if (book) {
             let success = {
                 status: true,
