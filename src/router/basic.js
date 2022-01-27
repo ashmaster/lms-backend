@@ -7,7 +7,7 @@ const Transaction = require("../model/transaction")
 router.post('/admin_login', async (req, res) => {
     try {
         let success
-        if (req.body.adminID === "admin@fgmhs" && req.body.password === "qvF#B9mde5") {
+        if (req.body.adminID === "admin@fgmhs" && req.body.password === "Fgmhs@451160") {
             success = {
                 status: true,
                 loggedin: true,
